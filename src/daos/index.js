@@ -1,32 +1,59 @@
-import {options} from "../config/databaseConfig.js";
-import {ProductModel} from "../models/product.models.js";
-import {CartModel} from "../models/cart.models.js";
+// Archive DAO
+import ProductDaoArchive from "./product/ProductDaoArchive.js";
+import CartDaoArchive from "./cart/CartDaoArchive.js";
 
-let ContenedorDaoProductos;
-let ContenedorDaoCarritos;
+// Memory DAO
+import ProductDaoMemory from "./product/ProductDaoMemory.js";
+import CartDaoMemory from "./cart/CartDaoMemory.js";
 
-//identificador
-let databaseType = "mongo";
+// Firebase DAO
+import ProductDaoFirebase from "./product/ProductDaoFirebase.js";
+import CartDaoFirebase from "./cart/CartDaoFirebase.js";
 
-switch(databaseType){
-    case "archivos":
-        const {ProductsDaoArchivos} = await import("./products/productsFiles.js");
-        const {CartsDaoArchivos} = await import("./carts/cartsFiles.js");
-        ContenedorDaoProductos = new ProductsDaoArchivos(options.fileSystem.pathProducts);
-        ContenedorDaoCarritos = new CartsDaoArchivos(options.fileSystem.pathCarts);
+// Mongo DAO
+import ProductDaoMongo from "./product/ProductDaoMongo.js";
+import CartDaoMongo from "./cart/CartDaoMongo.js";
+import OrderDaoMongo from "./order/OrderDaoMongo.js";
+import UserDaoMongo from "./user/UserDaoMongo.js";
+import MessageDaoMongo from "./message/MessageDaoMongo.js";
+
+let ProductDAO = null;
+let CartDAO = null;
+let OrderDAO = null;
+let MessageDAO = null;
+let UserDAO = null;
+
+const PERS = process.env.PERS || "mongo";
+
+switch (PERS) {
+    case "archive":
+        ProductDAO = ProductDaoArchive.getInstance();
+        CartDAO = CartDaoArchive.getInstance();
         break;
-    case "sql":
-        const {ProductosDaoSQL} = await import("./products/productsSql.js");
-        const {CarritosDaoSQL} = await import("./carts/cartsSql.js");
-        ContenedorDaoProductos = new ProductosDaoSQL(options.sqliteDB, "productos");
-        ContenedorDaoCarritos = new CarritosDaoSQL(options.sqliteDB,"carritos");
+
+    case "memory":
+        ProductDAO = ProductDaoMemory.getInstance();
+        CartDAO = CartDaoMemory.getInstance();
         break;
+
+    case "firebase":
+        ProductDAO = ProductDaoFirebase.getInstance();
+        CartDAO = CartDaoFirebase.getInstance();
+        break;
+
     case "mongo":
-        const {ProductosDaoMongo} = await import("./products/productsMongo.js");
-        const {CarritosDaoMongo} = await import("./carts/cartsMongo.js");
-        ContenedorDaoProductos = new ProductosDaoMongo(ProductModel);
-        ContenedorDaoCarritos = new CarritosDaoMongo(CartModel);
+        ProductDAO = ProductDaoMongo.getInstance();
+        CartDAO = CartDaoMongo.getInstance();
+        OrderDAO = OrderDaoMongo.getInstance();
+        MessageDAO = MessageDaoMongo.getInstance();
+        UserDAO = UserDaoMongo.getInstance();
         break;
 }
 
-export {ContenedorDaoProductos,ContenedorDaoCarritos}
+export {
+    ProductDAO,
+    CartDAO,
+    UserDAO,
+    OrderDAO,
+    MessageDAO
+};
